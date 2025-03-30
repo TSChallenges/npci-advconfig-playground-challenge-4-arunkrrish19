@@ -1,0 +1,204 @@
+@arunkrrish19 ➜ /workspaces/npci-advconfig-playground-challenge-4-arunkrrish19 (main) $ kubectl version
+Client Version: v1.28.3
+Kustomize Version: v5.0.4-0.20230601165947-6ce0bf390ce3
+Server Version: v1.21.3+k3s1
+WARNING: version difference between client (1.28) and server (1.21) exceeds the supported minor version skew of +/-1
+@arunkrrish19 ➜ /workspaces/npci-advconfig-playground-challenge-4-arunkrrish19 (main) $ kubectl apply -f cassandra.yaml
+statefulset.apps/cassandra created
+service/cassandra created
+@arunkrrish19 ➜ /workspaces/npci-advconfig-playground-challenge-4-arunkrrish19 (main) $ kubectl get pods -l app=cassandra
+
+NAME          READY   STATUS    RESTARTS   AGE
+cassandra-0   1/1     Running   0          57s
+cassandra-1   1/1     Running   0          42s
+@arunkrrish19 ➜ /workspaces/npci-advconfig-playground-challenge-4-arunkrrish19 (main) $ kubectl exec -it cassandra-0 -- bash
+root@cassandra-0:/# nodetool status
+Datacenter: datacenter1
+=======================
+Status=Up/Down
+|/ State=Normal/Leaving/Joining/Moving
+--  Address    Load        Tokens  Owns (effective)  Host ID                               Rack
+UN  10.42.0.5  119.82 KiB  16      100.0%            5267ddd4-1f77-4135-a641-bfac0336b0af  rack1
+UN  10.42.0.6  119.73 KiB  16      100.0%            be02f92e-3335-4eba-bf54-fbb8eab32e4a  rack1
+
+root@cassandra-0:/# ^C
+root@cassandra-0:/# exit
+exit
+command terminated with exit code 130
+@arunkrrish19 ➜ /workspaces/npci-advconfig-playground-challenge-4-arunkrrish19 (main) $ kubectl exec -it cassandra-1 -- bash
+root@cassandra-1:/# nodetool status
+Datacenter: datacenter1
+=======================
+Status=Up/Down
+|/ State=Normal/Leaving/Joining/Moving
+--  Address    Load        Tokens  Owns (effective)  Host ID                               Rack
+UN  10.42.0.5  119.82 KiB  16      100.0%            5267ddd4-1f77-4135-a641-bfac0336b0af  rack1
+UN  10.42.0.6  119.73 KiB  16      100.0%            be02f92e-3335-4eba-bf54-fbb8eab32e4a  rack1
+
+root@cassandra-1:/# ^C
+root@cassandra-1:/# nodetool info
+ID                     : be02f92e-3335-4eba-bf54-fbb8eab32e4a
+Gossip active          : true
+Native Transport active: true
+Load                   : 119.73 KiB
+Uncompressed load      : 156.98 KiB
+Generation No          : 1743314642
+Uptime (seconds)       : 335
+Heap Memory (MB)       : 151.97 / 4000.00
+Off Heap Memory (MB)   : 0.00
+Data Center            : datacenter1
+Rack                   : rack1
+Exceptions             : 0
+Key Cache              : entries 19, size 1.59 KiB, capacity 100 MiB, 110 hits, 128 requests, 0.859 recent hit rate, 14400 save period in seconds
+Row Cache              : entries 0, size 0 bytes, capacity 0 bytes, 0 hits, 0 requests, NaN recent hit rate, 0 save period in seconds
+Counter Cache          : entries 0, size 0 bytes, capacity 50 MiB, 0 hits, 0 requests, NaN recent hit rate, 7200 save period in seconds
+Network Cache          : size 8 MiB, overflow size: 0 bytes, capacity 128 MiB
+Percent Repaired       : 100.0%
+Token                  : (invoke with -T/--tokens to see all 16 tokens)
+Bootstrap state        : COMPLETED
+Bootstrap failed       : false
+Decommissioning        : false
+Decommission failed    : false
+root@cassandra-1:/# exit
+exit
+@arunkrrish19 ➜ /workspaces/npci-advconfig-playground-challenge-4-arunkrrish19 (main) $ kubectl exec -it cassandra-0 -- bash
+root@cassandra-0:/# nodetool status
+Datacenter: datacenter1
+=======================
+Status=Up/Down
+|/ State=Normal/Leaving/Joining/Moving
+--  Address    Load        Tokens  Owns (effective)  Host ID                               Rack
+UN  10.42.0.5  119.82 KiB  16      100.0%            5267ddd4-1f77-4135-a641-bfac0336b0af  rack1
+UN  10.42.0.6  119.73 KiB  16      100.0%            be02f92e-3335-4eba-bf54-fbb8eab32e4a  rack1
+
+root@cassandra-0:/# nodetool info
+ID                     : 5267ddd4-1f77-4135-a641-bfac0336b0af
+Gossip active          : true
+Native Transport active: true
+Load                   : 119.82 KiB
+Uncompressed load      : 157.03 KiB
+Generation No          : 1743314639
+Uptime (seconds)       : 386
+Heap Memory (MB)       : 101.83 / 4000.00
+Off Heap Memory (MB)   : 0.00
+Data Center            : datacenter1
+Rack                   : rack1
+Exceptions             : 0
+Key Cache              : entries 9, size 728 bytes, capacity 100 MiB, 78 hits, 86 requests, 0.907 recent hit rate, 14400 save period in seconds
+Row Cache              : entries 0, size 0 bytes, capacity 0 bytes, 0 hits, 0 requests, NaN recent hit rate, 0 save period in seconds
+Counter Cache          : entries 0, size 0 bytes, capacity 50 MiB, 0 hits, 0 requests, NaN recent hit rate, 7200 save period in seconds
+Network Cache          : size 8 MiB, overflow size: 0 bytes, capacity 128 MiB
+Percent Repaired       : 100.0%
+Token                  : (invoke with -T/--tokens to see all 16 tokens)
+Bootstrap state        : COMPLETED
+Bootstrap failed       : false
+Decommissioning        : false
+Decommission failed    : false
+root@cassandra-0:/# cqlsh
+Connected to TestCluster at 127.0.0.1:9042
+[cqlsh 6.2.0 | Cassandra 5.0.3 | CQL spec 3.4.7 | Native protocol v5]
+Use HELP for help.
+cqlsh> SELECT release_version FROM system.local;
+
+ release_version
+-----------------
+           5.0.3
+
+(1 rows)
+cqlsh> CREATE KEYSPACE test_keyspace WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};USE test_keyspace;CREATE TABLE test_table (id UUID PRIMARY KEY, name TEXT);INSERT INTO test_table (id, name) VALUES (uuid(), 'SampleData');SELECT * FROM test_table;
+
+ id                                   | name
+--------------------------------------+------------
+ 945cd918-1ea8-4811-94e9-5b01f15b501d | SampleData
+
+(1 rows)
+cqlsh:test_keyspace> exit
+root@cassandra-0:/# cqlsh
+Connected to TestCluster at 127.0.0.1:9042
+[cqlsh 6.2.0 | Cassandra 5.0.3 | CQL spec 3.4.7 | Native protocol v5]
+Use HELP for help.
+cqlsh> CREATE KEYSPACE user_data WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 2};
+cqlsh> DESCRIBE KEYSPACE user_data;
+
+CREATE KEYSPACE user_data WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '2'}  AND durable_writes = true;
+cqlsh> USE user_data;
+cqlsh:user_data> CREATE TABLE users (    id UUID PRIMARY KEY,    name TEXT,    email TEXT);
+cqlsh:user_data> INSERT INTO users (id, name, email) VALUES (uuid(), 'Alice', 'alice@example.com');
+cqlsh:user_data> INSERT INTO users (id, name, email) VALUES (uuid(), 'Terence', 'terence@example.com');
+cqlsh:user_data> INSERT INTO users (id, name, email) VALUES (uuid(), 'Mike', 'mike@example.com');
+cqlsh:user_data> SELECT * FROM users;
+
+ id                                   | email               | name
+--------------------------------------+---------------------+---------
+ d5cf3a22-0088-4722-83f7-753b65f2d3d5 | terence@example.com | Terence
+ 492b250d-61ce-4614-aa38-8e00a28a65e9 |    mike@example.com |    Mike
+ b0576ba1-815a-4d0e-9341-d478d600f20d |   alice@example.com |   Alice
+
+(3 rows)
+cqlsh:user_data> kubectl exec -it cassandra-1 -- bash
+             ...
+cqlsh:user_data> exit
+root@cassandra-0:/# exit
+exit
+@arunkrrish19 ➜ /workspaces/npci-advconfig-playground-challenge-4-arunkrrish19 (main) $ kubectl exec -it cassandra-1 -- bash
+root@cassandra-1:/# cqlsh
+Connected to TestCluster at 127.0.0.1:9042
+[cqlsh 6.2.0 | Cassandra 5.0.3 | CQL spec 3.4.7 | Native protocol v5]
+Use HELP for help.
+cqlsh> USE user_data;
+cqlsh:user_data> SELECT * FROM users;
+
+ id                                   | email               | name
+--------------------------------------+---------------------+---------
+ d5cf3a22-0088-4722-83f7-753b65f2d3d5 | terence@example.com | Terence
+ 492b250d-61ce-4614-aa38-8e00a28a65e9 |    mike@example.com |    Mike
+ b0576ba1-815a-4d0e-9341-d478d600f20d |   alice@example.com |   Alice
+
+(3 rows)
+cqlsh:user_data> DESCRIBE TABLE user_data.users;
+
+CREATE TABLE user_data.users (
+    id uuid PRIMARY KEY,
+    email text,
+    name text
+) WITH additional_write_policy = '99p'
+    AND allow_auto_snapshot = true
+    AND bloom_filter_fp_chance = 0.01
+    AND caching = {'keys': 'ALL', 'rows_per_partition': 'NONE'}
+    AND cdc = false
+    AND comment = ''
+    AND compaction = {'class': 'org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy', 'max_threshold': '32', 'min_threshold': '4'}
+    AND compression = {'chunk_length_in_kb': '16', 'class': 'org.apache.cassandra.io.compress.LZ4Compressor'}
+    AND memtable = 'default'
+    AND crc_check_chance = 1.0
+    AND default_time_to_live = 0
+    AND extensions = {}
+    AND gc_grace_seconds = 864000
+    AND incremental_backups = true
+    AND max_index_interval = 2048
+    AND memtable_flush_period_in_ms = 0
+    AND min_index_interval = 128
+    AND read_repair = 'BLOCKING'
+    AND speculative_retry = '99p';
+cqlsh:user_data> SELECT compaction FROM system_schema.tables WHERE keyspace_name = 'user_data' AND table_name = 'users';
+
+ compaction
+---------------------------------------------------------------------------------------------------------------------------
+ {'class': 'org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy', 'max_threshold': '32', 'min_threshold': '4'}
+
+(1 rows)
+cqlsh:user_data> ALTER TABLE user_data.users WITH caching = {    'keys': 'ALL',    'rows_per_partition': '10'};
+cqlsh:user_data> CREATE INDEX ON user_data.users (email);
+cqlsh:user_data> BEGIN BATCH  INSERT INTO user_data.users (id, name, email) VALUES (uuid(), 'Priya', 'priya@example.com');  INSERT INTO user_data.users (id, name, email) VALUES (uuid(), 'Shahid', 'shahid@example.com');APPLY BATCH;
+cqlsh:user_data> SELECT * FROM user_data.users;
+
+ id                                   | email               | name
+--------------------------------------+---------------------+---------
+ d5cf3a22-0088-4722-83f7-753b65f2d3d5 | terence@example.com | Terence
+ 492b250d-61ce-4614-aa38-8e00a28a65e9 |    mike@example.com |    Mike
+ b0576ba1-815a-4d0e-9341-d478d600f20d |   alice@example.com |   Alice
+ 7d02ac15-6f63-4763-9534-2cea1db22cb8 |  shahid@example.com |  Shahid
+ 7a9b36b1-dcb7-452b-996b-a10c2eb83965 |   priya@example.com |   Priya
+
+(5 rows)
+cqlsh:user_data>
